@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 
 chapter_patterns = [
-    r'^d+$',
+    r'^\d+$',
     r'^Chapter\s+\d+\.',
     r'^Foreword',
     r'^Index'
