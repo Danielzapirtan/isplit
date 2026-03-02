@@ -3,6 +3,13 @@ import os
 import re
 from pathlib import Path
 
+chapter_patterns = [
+    r'^d+$',
+    r'^Chapter\s+\d+\.',
+    r'^Foreword',
+    r'^Index'
+]
+
 def split_by_headers(input_path, output_dir):
     with open(input_path, 'rb') as file:
         pdf_reader = PyPDF2.PdfReader(file)
