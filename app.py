@@ -7,7 +7,9 @@ chapter_patterns = [
     r'^\d+$',
     r'^Chapter\s+\d+\.',
     r'^Foreword',
-    r'^Index'
+    r'^Index',
+    r'^Backword',
+    r'^Contents'
 ]
 
 def split_by_headers(input_path, output_dir):
