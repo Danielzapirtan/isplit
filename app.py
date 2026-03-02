@@ -28,13 +28,11 @@ def split_by_headers(input_path, output_dir):
                 for pattern in chapter_patterns:
                     if re.search(pattern, first_line.strip()):
                         delimiter_positions.append(page_num)
-            '''
-            if text:
+            if text and False:
                 lines = text.split("\n")
                 for line in lines:
                     if re.search(r'^\d+\s+-\s+', line):
                         delimiter_positions.append(page_num)
-            '''
         if total_pages > 0:
             delimiter_positions.append(total_pages)
         delimiter_positions = sorted(set(delimiter_positions))
