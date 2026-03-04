@@ -3,6 +3,9 @@ import os
 import re
 from pathlib import Path
 
+pattern_pos = r'^\d+$'
+pattern_neg = r'^.*\s+\d+$'
+
 chapter_patterns = [
     r'^\d+$',
     r'^Chapter\s+\d+\.',
@@ -25,9 +28,10 @@ def split_by_headers(input_path, output_dir):
             text = page.extract_text()
             if text:
                 first_line = text.split('\n')[0] if '\n' in text else text
-                for pattern in chapter_patterns:
-                    if re.search(pattern, first_line.strip()):
-                        delimiter_positions.append(page_num)
+                if re.search(pattern_pos, first_line.strip()):
+                    delimiter_positions.append(page_num)
+                if not re.search(pattern_neg, first_line.strip()):
+                    delimiter_positions.append(page_num)
         if total_pages > 0:
             delimiter_positions.append(total_pages)
         delimiter_positions = sorted(set(delimiter_positions))
