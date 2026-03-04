@@ -4,7 +4,8 @@ import re
 from pathlib import Path
 
 pattern_pos = r'^\d+$'
-pattern_neg = r'^.*\s+\d+$'
+pattern_neg1 = r'^\s*\d+\s+.*$'
+pattern_neg2 = r'^.*\s+\d+\s*$'
 
 def split_by_headers(input_path, output_dir):
     with open(input_path, 'rb') as file:
@@ -18,7 +19,7 @@ def split_by_headers(input_path, output_dir):
             text = page.extract_text()
             if text:
                 first_line = text.split('\n')[0] if '\n' in text else text
-                if re.search(pattern_pos, first_line.strip()) or not re.search(pattern_neg, first_line.strip()):
+                if re.search(pattern_pos, first_line.strip()) or not re.search(pattern_neg1, first_line.strip()) and not re.search(pattern_neg2, first_line.strip()):
                     delimiter_positions.append(page_num)
         if total_pages > 0:
             delimiter_positions.append(total_pages)
