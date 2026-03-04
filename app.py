@@ -5,8 +5,10 @@ from pathlib import Path
 
 pattern_pos = r'^\d+$'
 pattern_neg = [
-    r'^\s*[0-9IVXL]+\s+.*$',
-    r'^.*\s+[0-9IXVL]+\s*$'
+    r'^\s*\d+\s+.*$',
+    r'^.*\s+\d+\s*$',
+    r'^\s*[IVX]+\s+.*$',
+    r'^.*\s+[IVX]+\s*$'
 ]
 
 def split_by_headers(input_path, output_dir):
