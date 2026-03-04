@@ -6,16 +6,6 @@ from pathlib import Path
 pattern_pos = r'^\d+$'
 pattern_neg = r'^.*\s+\d+$'
 
-chapter_patterns = [
-    r'^\d+$',
-    r'^Chapter\s+\d+\.',
-    r'^Foreword',
-    r'^Index',
-    r'^Backword',
-    r'^Contents',
-    r'^References'
-]
-
 def split_by_headers(input_path, output_dir):
     with open(input_path, 'rb') as file:
         pdf_reader = PyPDF2.PdfReader(file)
@@ -28,9 +18,7 @@ def split_by_headers(input_path, output_dir):
             text = page.extract_text()
             if text:
                 first_line = text.split('\n')[0] if '\n' in text else text
-                if re.search(pattern_pos, first_line.strip()):
-                    delimiter_positions.append(page_num)
-                if not re.search(pattern_neg, first_line.strip()):
+                if re.search(pattern_pos, first_line.strip()) or not re.search(pattern_neg, first_line.strip()):
                     delimiter_positions.append(page_num)
         if total_pages > 0:
             delimiter_positions.append(total_pages)
