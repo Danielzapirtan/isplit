@@ -22,10 +22,10 @@ def split_by_headers(input_path):
             text = page.extract_text()
             if text:
                 first_line = text.split('\n')[0] if '\n' in text else text
+                ok = True
                 if re.search(pattern_pos, first_line.strip()):
                     delimiter_positions.append(page_num)
-                    continue
-                ok = True
+                    ok = False
                 for pattern in pattern_neg:
                     if re.search(pattern, first_line.strip()):
                         ok = False
