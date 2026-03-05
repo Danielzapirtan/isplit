@@ -16,6 +16,9 @@ pattern_dsd = [
 pattern_dfl = [
     r'^\s*Chapter\s+\d+',
     r'^\s*Foreword',
+    r'^\s*Preface',
+    r'^\s*Acknowledgements',
+    r'^\s*Introduction',
     r'^\s*Backword',
     r'^\s*Index',
     r'^\s*Contents',
