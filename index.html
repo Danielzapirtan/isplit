@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Chapter Splitter</title>
+    <style>
+        * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+        body { max-width: 800px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { margin-top: 0; color: #333; }
+        .step { margin: 25px 0; padding: 15px; border-left: 4px solid #2196F3; background: #f8f9fa; }
+        button { background: #2196F3; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        button.secondary { background: #4CAF50; }
+        input[type="file"] { margin: 10px 0; }
+        .chapter-item { margin: 8px 0; padding: 8px; background: white; border: 1px solid #ddd; border-radius: 4px; display: flex; align-items: center; }
+        .chapter-pages { color: #666; font-size: 0.9em; margin-left: 15px; }
+        .preview { max-height: 300px; overflow-y: auto; margin: 15px 0; border: 1px solid #ddd; padding: 10px; }
+        .question { background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; }
+        .radio-group { display: flex; gap: 20px; flex-wrap: wrap; margin: 10px 0; }
+        .checkbox-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .checkbox-group label { margin-right: 15px; }
+        .status { padding: 10px; background: #e8f5e8; border-radius: 4px; margin: 10px 0; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+    </style>
+    <!-- Load external PDF libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 PDF Chapter Splitter</h1>
+        <p>Upload a PDF, help identify chapter patterns, and download each chapter as separate PDFs in a ZIP file.</p>
+
+        <!-- Step 1: Upload -->
+        <div class="step" id="step1">
+            <h3>Step 1: Upload PDF</h3>
+            <input type="file" id="fileInput" accept=".pdf" />
+            <div id="pdfInfo" class="status" style="display:none;"></div>
+        </div>
+
+        <!-- Step 2: Chapter Pattern Questions -->
+        <div class="step" id="step2" style="display:none;">
+            <h3>Step 2: How are chapters marked?</h3>
+            
+            <div class="question">
+                <p><strong>1. What words indicate chapter beginnings?</strong></p>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="wordChapter" checked> Chapter / CHAPTER</label>
+                    <label><input type="checkbox" id="wordPart"> Part / PART</label>
+                    <label><input type="checkbox" id="wordSection"> Section</label>
+                    <label><input type="checkbox" id="wordUnit"> Unit</label>
+                </div>
+                <div style="margin-top:8px;">
+                    <label>Custom: <input type="text" id="customWords" placeholder="e.g., Lesson, Module (comma-separated)"></label>
+                </div>
+            </div>
+
+            <div class="question">
+                <p><strong>2. Numbering pattern?</strong></p>
+                <div class="radio-group">
+                    <label><input type="radio" name="numbering" value="arabic" checked> 1, 2, 3 (Arabic)</label>
+                    <label><input type="radio" name="numbering" value="roman"> I, II, III (Roman)</label>
+                    <label><input type="radio" name="numbering" value="words"> One, Two, Three</label>
+                    <label><input type="radio" name="numbering" value="none"> No numbers, just titles</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <p><strong>3. Text style of chapter titles?</strong></p>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="styleBold" checked> Bold</label>
+                    <label><input type="checkbox" id="styleLarge" checked> Larger font</label>
+                    <label><input type="checkbox" id="styleCaps"> ALL CAPS</label>
+                    <label><input type="checkbox" id="styleCentered"> Centered</label>
+                    <label><input type="checkbox" id="styleUnderline"> Underlined</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <p><strong>4. Sample text from first pages (to help detection):</strong></p>
+                <p class="preview" id="textPreview">Loading first few pages...</p>
+                <p>Based on the sample above, does the pattern match?</p>
+                <button id="detectChaptersBtn" class="secondary">🔍 Detect Chapters</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Chapter List -->
+        <div class="step" id="step3" style="display:none;">
+            <h3>Step 3: Detected Chapters</h3>
+            <p>Verify and adjust chapter boundaries:</p>
+            <div id="chapterList"></div>
+            <button id="splitBtn" class="secondary">📦 Split & Download ZIP</button>
+        </div>
+
+        <!-- Progress & Status -->
+        <div id="progress" style="display:none;" class="status">
+            <span id="progressMessage">Processing...</span>
+        </div>
+    </div>
+
+    <script>
+        let pdfDoc = null;
+        let pdfBytes = null;
+        let chapters = [];
+        let totalPages = 0;
+
+        // Initialize PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        document.getElementById('fileInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                // Read file as bytes for later use
+                pdfBytes = await file.arrayBuffer();
+                
+                // Load PDF with pdf.js for analysis
+                pdfDoc = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
+                totalPages = pdfDoc.numPages;
+                
+                document.getElementById('pdfInfo').style.display = 'block';
+                document.getElementById('pdfInfo').innerHTML = `✅ Loaded: ${file.name}<br>Pages: ${totalPages}`;
+                
+                // Show step 2
+                document.getElementById('step2').style.display = 'block';
+                
+                // Load preview text from first 3 pages
+                await loadPreviewText();
+                
+            } catch (error) {
+                alert('Error loading PDF: ' + error.message);
+            }
+        });
+
+        async function loadPreviewText() {
+            const preview = document.getElementById('textPreview');
+            preview.innerHTML = 'Loading...';
+            
+            let sampleText = '';
+            const pagesToShow = Math.min(3, totalPages);
+            
+            for (let i = 1; i <= pagesToShow; i++) {
+                const page = await pdfDoc.getPage(i);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map(item => item.str).join(' ');
+                sampleText += `--- Page ${i} ---\n${pageText.substring(0, 300)}${pageText.length > 300 ? '...' : ''}\n\n`;
+            }
+            
+            preview.innerHTML = sampleText.replace(/\n/g, '<br>');
+        }
+
+        document.getElementById('detectChaptersBtn').addEventListener('click', async function() {
+            document.getElementById('progress').style.display = 'block';
+            document.getElementById('progressMessage').innerText = 'Analyzing document structure...';
+            
+            await detectChapters();
+            
+            document.getElementById('progress').style.display = 'none';
+            document.getElementById('step3').style.display = 'block';
+            displayChapters();
+        });
+
+        async function detectChapters() {
+            chapters = [];
+            
+            // Gather user preferences
+            const chapterWords = [];
+            if (document.getElementById('wordChapter').checked) chapterWords.push('chapter', 'CHAPTER', 'Chapter');
+            if (document.getElementById('wordPart').checked) chapterWords.push('part', 'PART', 'Part');
+            if (document.getElementById('wordSection').checked) chapterWords.push('section', 'SECTION', 'Section');
+            if (document.getElementById('wordUnit').checked) chapterWords.push('unit', 'UNIT', 'Unit');
+            
+            const customWords = document.getElementById('customWords').value;
+            if (customWords) {
+                customWords.split(',').map(w => w.trim()).forEach(w => chapterWords.push(w));
+            }
+            
+            const numbering = document.querySelector('input[name="numbering"]:checked').value;
+            
+            // Scan through pages to find chapter starts
+            let currentChapter = { startPage: 1, title: 'Start', pages: [] };
+            
+            for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+                const page = await pdfDoc.getPage(pageNum);
+                const textContent = await page.getTextContent();
+                const text = textContent.items.map(item => item.str).join(' ');
+                
+                // Simple detection: look for chapter words near start of page
+                const firstChars = text.substring(0, 200);
+                let isChapterStart = false;
+                
+                for (const word of chapterWords) {
+                    if (firstChars.toLowerCase().includes(word.toLowerCase())) {
+                        // Found potential chapter marker
+                        if (pageNum > 1) { // Don't create chapter 0
+                            if (chapters.length === 0 && pageNum > 1) {
+                                // First chapter starts at page 1
+                                chapters.push({ number: 1, title: 'Chapter 1', startPage: 1, endPage: pageNum - 1 });
+                            }
+                            
+                            // Extract title (simple version - just first line containing chapter word)
+                            const lines = firstChars.split('\n');
+                            let title = lines.find(l => l.toLowerCase().includes(word.toLowerCase())) || `Chapter ${chapters.length + 1}`;
+                            
+                            chapters.push({ 
+                                number: chapters.length + 1, 
+                                title: title.trim().substring(0, 50), 
+                                startPage: pageNum,
+                                endPage: totalPages // temporary
+                            });
+                            
+                            // Update previous chapter's end page
+                            if (chapters.length > 1) {
+                                chapters[chapters.length - 2].endPage = pageNum - 1;
+                            }
+                            
+                            isChapterStart = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Ensure last chapter ends at last page
+            if (chapters.length > 0) {
+                chapters[chapters.length - 1].endPage = totalPages;
+            } else {
+                // No chapters detected, create one for whole book
+                chapters.push({ number: 1, title: 'Full Book', startPage: 1, endPage: totalPages });
+            }
+        }
+
+        function displayChapters() {
+            const list = document.getElementById('chapterList');
+            list.innerHTML = '';
+            
+            chapters.forEach((chapter, index) => {
+                const div = document.createElement('div');
+                div.className = 'chapter-item';
+                div.innerHTML = `
+                    <input type="text" value="${chapter.title}" data-index="${index}" class="chapter-title" style="flex:1; margin-right:10px; padding:5px;">
+                    <span class="chapter-pages">
+                        Pages: <input type="number" value="${chapter.startPage}" data-index="${index}" class="start-page" style="width:60px;"> 
+                        - <input type="number" value="${chapter.endPage}" data-index="${index}" class="end-page" style="width:60px;">
+                    </span>
+                `;
+                list.appendChild(div);
+            });
+            
+            // Add event listeners for inputs
+            document.querySelectorAll('.chapter-title').forEach(input => {
+                input.addEventListener('change', function() {
+                    chapters[this.dataset.index].title = this.value;
+                });
+            });
+            
+            document.querySelectorAll('.start-page').forEach(input => {
+                input.addEventListener('change', function() {
+                    chapters[this.dataset.index].startPage = parseInt(this.value);
+                });
+            });
+            
+            document.querySelectorAll('.end-page').forEach(input => {
+                input.addEventListener('change', function() {
+                    chapters[this.dataset.index].endPage = parseInt(this.value);
+                });
+            });
+        }
+
+        document.getElementById('splitBtn').addEventListener('click', async function() {
+            document.getElementById('progress').style.display = 'block';
+            document.getElementById('progressMessage').innerText = 'Creating chapter PDFs...';
+            
+            try {
+                const zip = new JSZip();
+                
+                for (let i = 0; i < chapters.length; i++) {
+                    const chapter = chapters[i];
+                    document.getElementById('progressMessage').innerText = `Processing chapter ${i+1} of ${chapters.length}...`;
+                    
+                    // Create PDF for this chapter using pdf-lib
+                    const pdfDocLib = await PDFLib.PDFDocument.load(pdfBytes);
+                    const newPdf = await PDFLib.PDFDocument.create();
+                    
+                    // Copy pages from original
+                    for (let pageNum = chapter.startPage; pageNum <= chapter.endPage; pageNum++) {
+                        const [copiedPage] = await newPdf.copyPages(pdfDocLib, [pageNum - 1]); // 0-based index
+                        newPdf.addPage(copiedPage);
+                    }
+                    
+                    // Save as bytes
+                    const chapterBytes = await newPdf.save();
+                    
+                    // Add to zip
+                    const safeTitle = chapter.title.replace(/[^a-z0-9]/gi, '_').substring(0, 30);
+                    zip.file(`Chapter_${chapter.number}_${safeTitle}.pdf`, chapterBytes);
+                }
+                
+                // Add metadata
+                zip.file('chapters.txt', chapters.map(c => 
+                    `Chapter ${c.number}: ${c.title} (Pages ${c.startPage}-${c.endPage})`
+                ).join('\n'));
+                
+                document.getElementById('progressMessage').innerText = 'Creating ZIP file...';
+                
+                // Generate and download ZIP
+                const zipBlob = await zip.generateAsync({ type: 'blob' });
+                saveAs(zipBlob, 'chapters.zip');
+                
+                document.getElementById('progress').style.display = 'none';
+                alert('✅ Done! ZIP file downloaded with all chapters.');
+                
+            } catch (error) {
+                document.getElementById('progress').style.display = 'none';
+                alert('Error splitting PDF: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
