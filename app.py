@@ -34,7 +34,11 @@ def split_by_headers(input_path):
             if text:
                 first_line = text.split('\n')[0] if '\n' in text else text
                 ok = True
-                if re.search(pattern_pos, first_line.strip()):
+                for pattern in pattern_dfl:
+                    if re.search(pattern, first_line.strip()):
+                    delimiter_positions.append(page_num)
+                    ok = False
+                if ok and re.search(pattern_pos, first_line.strip()):
                     delimiter_positions.append(page_num)
                     ok = False
                 for pattern in pattern_neg:
