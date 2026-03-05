@@ -16,7 +16,6 @@ def split_by_headers(input_path, output_dir):
         pdf_reader = PyPDF2.PdfReader(file)
         total_pages = len(pdf_reader.pages)
         delimiter_positions = []
-        prev_first_line = None
         delimiter_positions.append(0)
         for page_num in range(total_pages - 1):
             page = pdf_reader.pages[page_num]
