@@ -7,7 +7,7 @@ pattern_pos = r'^\d+$'
 pattern_neg = [
     r'^\s*\d+\s+.*$',
     r'^.*\s+\d+\s*$',
-    r'^\s*\D+\s*$'
+    r'^\s*[IVX]+\s*$'
 ]
 
 def split_by_headers(input_path, output_dir):
