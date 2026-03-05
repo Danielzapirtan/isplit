@@ -11,7 +11,7 @@ pattern_neg = [
     r'^.*\s+[IVX]+\s*$'
 ]
 
-def split_by_headers(input_path, output_dir):
+def split_by_headers(input_path):
     with open(input_path, 'rb') as file:
         pdf_reader = PyPDF2.PdfReader(file)
         total_pages = len(pdf_reader.pages)
@@ -50,7 +50,7 @@ def main():
     print(f"📂 Output directory: {output_dir}")
     print("=" * 70)
     os.makedirs(output_dir, exist_ok=True)
-    delimiter_positions = split_by_headers(input_path, output_dir)
+    delimiter_positions = split_by_headers(input_path)
     with open(input_path, 'rb') as file:
         pdf_reader = PyPDF2.PdfReader(file)
         total_pages = len(pdf_reader.pages)
@@ -70,5 +70,4 @@ def main():
     print("=" * 70)
 
 if __name__ == "__main__":
-    total_pages = 0
     main()
