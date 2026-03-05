@@ -30,7 +30,6 @@ def split_by_headers(input_path, output_dir):
                 for pattern in pattern_neg:
                     if re.search(pattern, first_line.strip()):
                         ok = False
-                        break
                 if ok:
                     delimiter_positions.append(page_num)
         if total_pages > 0:
