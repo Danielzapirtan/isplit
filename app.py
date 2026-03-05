@@ -10,6 +10,17 @@ pattern_neg = [
     r'^\s*[ivx]+\s+.*$',
     r'^.*\s+[ivx]+\s*$'
 ]
+pattern_dsd = [
+    r'^\d+\s+\-\s+'
+]
+pattern_dfl = [
+    r'^\s*Chapter\s+\d+',
+    r'^\s*Foreword',
+    r'^\s*Backword',
+    r'^\s*Index',
+    r'^\s*Contents',
+    r'^\s*References'
+]
 
 def split_by_headers(input_path):
     with open(input_path, 'rb') as file:
