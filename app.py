@@ -58,7 +58,6 @@ def main():
     output_dir = '/content/drive/MyDrive/split_chapters'
     if not os.path.exists(input_path):
         print(f"❌ Error: Input file not found at {input_path}")
-        print(f"Please make sure your PDF is at: {input_path}")
         return
     print("=" * 70)
     print("📚 PDF CHAPTER SPLITTER")
