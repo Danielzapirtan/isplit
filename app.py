@@ -44,7 +44,7 @@ def split_by_headers(input_path, dsdok):
                         for pattern in pattern_dfl:
                             if re.search(pattern, line):
                                 delimiter_positions.append(page_num)
-                                ok = false
+                                ok = False
                 first_line = text.split('\n')[0] if '\n' in text else text
                 if ok and re.search(pattern_pos, first_line.strip()):
                     delimiter_positions.append(page_num)
