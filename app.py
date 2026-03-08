@@ -39,7 +39,7 @@ def split_by_headers(input_path):
                 ok = True
                 for pattern in pattern_dfl:
                     if re.search(pattern, first_line.strip()):
-                    delimiter_positions.append(page_num)
+                        delimiter_positions.append(page_num)
                     ok = False
                 if ok and re.search(pattern_pos, first_line.strip()):
                     delimiter_positions.append(page_num)
