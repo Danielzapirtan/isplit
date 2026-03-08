@@ -12,7 +12,7 @@ pattern_neg = [
     r'^\s*[ivx]+\s+.*$',
     r'^.*\s+[ivx]+\s*$'
 ]
-pattern_dsd = r'^\d+\s+\-\s+'
+pattern_dsd = r'^\s*\d+\s+\-\s+'
 pattern_dfl = [
     r'^\s*Chapter\s+\d+',
     r'^\s*Foreword',
