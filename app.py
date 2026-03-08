@@ -34,13 +34,13 @@ def split_by_headers(input_path):
         for page_num in range(total_pages - 1):
             page = pdf_reader.pages[page_num]
             text = page.extract_text()
+            ok = False
             if text:
+                ok = True
                 if dsdok == 'd' and re.search(pattern_dsd, text):
                     delimiter_positions.append(page_num)
-                    ok = true
-                    continue
+                    ok = False
                 first_line = text.split('\n')[0] if '\n' in text else text
-                ok = True
                 if ok and re.search(pattern_pos, first_line.strip()):
                     delimiter_positions.append(page_num)
                     ok = False
