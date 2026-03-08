@@ -3,6 +3,8 @@ import os
 import re
 from pathlib import Path
 
+dsdok = None
+
 pattern_pos = r'^\d+$'
 pattern_neg = [
     r'^\s*\d+\s+.*$',
@@ -35,6 +37,10 @@ def split_by_headers(input_path):
             page = pdf_reader.pages[page_num]
             text = page.extract_text()
             if text:
+                if dsdok == 'd' and re.search(pattern_dsd, text):
+                    delimiter_positions.append(page_num)
+                    ok = true
+                    continue
                 first_line = text.split('\n')[0] if '\n' in text else text
                 ok = True
                 if ok and re.search(pattern_pos, first_line.strip()):
@@ -55,6 +61,7 @@ def split_by_headers(input_path):
 def main():
     #input_path = '/content/drive/MyDrive/input.pdf'
     input_path = input("Introduceți calea către PDF (exemplu: /content/drive/MyDrive/input.pdf): ")
+    dsdok = input("Permiteți heading de capitol mai jos în pagină (d/n)?")
     input_file = Path(input_path)
     output_dir = input_file.parent/f"{input_file.stem}_split_chapters"
     if not os.path.exists(input_path):
