@@ -3,8 +3,6 @@ import os
 import re
 from pathlib import Path
 
-dsdok = None
-
 pattern_pos = r'^\d+$'
 pattern_neg = [
     r'^\s*\d+\s+.*$',
@@ -25,7 +23,7 @@ pattern_dfl = [
     r'^\s*References'
 ]
 
-def split_by_headers(input_path):
+def split_by_headers(input_path, dsdok):
     with open(input_path, 'rb') as file:
         pdf_reader = PyPDF2.PdfReader(file)
         total_pages = len(pdf_reader.pages)
@@ -37,9 +35,10 @@ def split_by_headers(input_path):
             ok = False
             if text:
                 ok = True
-                if (dsdok != 'n') and re.search(pattern_dsd, text):
-                    delimiter_positions.append(page_num)
-                    ok = False
+                if dsdok != 'n':
+                    if re.search(pattern_dsd, text):
+                        delimiter_positions.append(page_num)
+                        ok = False
                 first_line = text.split('\n')[0] if '\n' in text else text
                 if ok and re.search(pattern_pos, first_line.strip()):
                     delimiter_positions.append(page_num)
@@ -72,7 +71,7 @@ def main():
     print(f"📂 Output directory: {output_dir}")
     print("=" * 70)
     os.makedirs(output_dir, exist_ok=True)
-    delimiter_positions = split_by_headers(input_path)
+    delimiter_positions = split_by_headers(input_path, dsdok)
     with open(input_path, 'rb') as file:
         pdf_reader = PyPDF2.PdfReader(file)
         total_pages = len(pdf_reader.pages)
