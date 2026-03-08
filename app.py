@@ -37,7 +37,7 @@ def split_by_headers(input_path):
             ok = False
             if text:
                 ok = True
-                if dsdok == 'd' and re.search(pattern_dsd, text):
+                if dsdok != 'n' and re.search(pattern_dsd, text):
                     delimiter_positions.append(page_num)
                     ok = False
                 first_line = text.split('\n')[0] if '\n' in text else text
