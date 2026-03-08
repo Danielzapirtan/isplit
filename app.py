@@ -36,18 +36,22 @@ def split_by_headers(input_path, dsdok):
             if text:
                 ok = True
                 if dsdok:
+                    print('bp 10')
                     lines = text.split('\n') if '\n' in text else [text]
                     for line in lines:
+                        print('bp 20')
                         if re.search(pattern_dsd, line):
                             delimiter_positions.append(page_num)
                             ok = False
+                            print('bp 30')
                 first_line = text.split('\n')[0] if '\n' in text else text
                 if ok and re.search(pattern_pos, first_line.strip()):
                     delimiter_positions.append(page_num)
                     ok = False
-                for pattern in pattern_neg:
-                    if re.search(pattern, first_line.strip()):
-                        ok = False
+                if ok:
+                    for pattern in pattern_neg:
+                        if re.search(pattern, first_line.strip()):
+                            ok = False
                 if ok:
                     for pattern in pattern_dfl:
                         if re.search(pattern, first_line.strip()):
