@@ -38,10 +38,9 @@ def split_by_headers(input_path, dsdok):
                 if dsdok:
                     lines = text.split('\n') if '\n' in text else [text]
                     for line in lines:
-                        if re.search(pattern_dsd, line):
+                        if re.search(pattern_dsd, line) or re.search(pattern_dfl, line):
                             delimiter_positions.append(page_num)
                             ok = False
-                            print('bp 30')
                 first_line = text.split('\n')[0] if '\n' in text else text
                 if ok and re.search(pattern_pos, first_line.strip()):
                     delimiter_positions.append(page_num)
