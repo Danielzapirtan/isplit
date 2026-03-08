@@ -54,7 +54,7 @@ def split_by_headers(input_path):
 
 def main():
     #input_path = '/content/drive/MyDrive/input.pdf'
-    input_path = input("Introduceți calea către PDF: ")
+    input_path = input("Introduceți calea către PDF (exemplu: /content/drive/MyDrive/input.pdf): ")
     output_dir = '/content/drive/MyDrive/split_chapters'
     if not os.path.exists(input_path):
         print(f"❌ Error: Input file not found at {input_path}")
