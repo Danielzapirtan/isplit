@@ -10,9 +10,6 @@ pattern_neg = [
     r'^\s*[ivx]+\s+.*$',
     r'^.*\s+[ivx]+\s*$',
 ]
-pattern_nch = [
-    r'^\s*FIGURE\s+\d+\.\d+.*$'
-]
 pattern_dsd = r'^\s*\d+\s+-\s+'
 pattern_dfl = [
     r'^.*CHAPTER\s+\d+$',
@@ -39,8 +36,8 @@ def split_by_headers(input_path, dsdok):
             ok = False
             if text:
                 ok = True
-                if re.search(pattern_nch[0], text):
-                    ok = False
+                if re.search(pattern_pos, text):
+                    continue
                 if dsdok:
                     lines = text.split('\n') if '\n' in text else [text]
                     for line in lines:
