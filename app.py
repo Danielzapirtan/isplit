@@ -32,6 +32,9 @@ def split_by_headers(input_path, dsdok):
         delimiter_positions.append(0)
         for page_num in range(total_pages - 1):
             page = pdf_reader.pages[page_num]
+            rotation = page.get('/Rotate', 0)
+            if rotation in [90, 270]:
+                continue
             text = page.extract_text()
             ok = False
             if text:
