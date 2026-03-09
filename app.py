@@ -37,7 +37,7 @@ def split_by_headers(input_path, dsdok):
             if text:
                 ok = True
                 if re.search(pattern_pos, text):
-                    continue
+                    ok = False
                 if dsdok:
                     lines = text.split('\n') if '\n' in text else [text]
                     for line in lines:
