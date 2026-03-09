@@ -9,6 +9,7 @@ pattern_neg = [
     r'^.*\s+\d+\s*$',
     r'^\s*[ivx]+\s+.*$',
     r'^.*\s+[ivx]+\s*$',
+    r'FIGURE'
 ]
 pattern_dsd = r'^\s*\d+\s+-\s+'
 pattern_dfl = [
@@ -36,8 +37,6 @@ def split_by_headers(input_path, dsdok):
             ok = False
             if text:
                 ok = True
-                if re.search(pattern_pos, text):
-                    ok = False
                 if dsdok:
                     lines = text.split('\n') if '\n' in text else [text]
                     for line in lines:
