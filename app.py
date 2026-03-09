@@ -12,6 +12,7 @@ pattern_neg = [
 ]
 pattern_dsd = r'^\s*\d+\s+-\s+'
 pattern_dfl = [
+    r'^.*CHAPTER\s+\d+$',
     r'^\s*Chapter\s+\d+',
     r'^\s*Foreword',
     r'^\s*Preface',
