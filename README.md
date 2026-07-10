@@ -4,7 +4,7 @@ Intelligently split PDFs into chapters using `lazy-splitter`.
 Files stay in your Google Drive. Works entirely with GitHub Pages + Google Colab.
 
 ## Live Demo
-https://YOUR_USERNAME.github.io/YOUR_REPO
+https://Danielzapirtan.github.io/isplit
 
 ## Setup
 1. Replace `YOUR_USERNAME` and `YOUR_REPO` in:
