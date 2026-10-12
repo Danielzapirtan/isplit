@@ -12,3 +12,4 @@ We assume the PDF is searchable.
 
 ## Finding chapters' first page
 
+```pseudocode
