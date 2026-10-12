@@ -15,3 +15,6 @@ We assume the PDF is searchable.
 ```pseudocode
 page.firstLine: Get()
 page.reChaptHeadings: Match()
+RULES::
+Chapter.referenceOnly: Skip()
+ambiguousChars: Solve()
