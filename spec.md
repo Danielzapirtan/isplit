@@ -16,5 +16,5 @@ We assume the PDF is searchable.
 page.firstLine: Get()
 page.reChaptHeadings: Match()
 RULES::
-Chapter.referenceOnly: Skip()
-ambiguousChars: Solve()
+chapterHeading.referenceOnly: Skip()
+heading.ambiguousChars: Solve()
