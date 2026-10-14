@@ -12,9 +12,3 @@ We assume the PDF is searchable.
 
 ## Finding chapters' first page
 
-```pseudocode
-page.firstLine: Get()
-page.reChaptHeadings: Match()
-RULES::
-chapterHeading.referenceOnly: Skip()
-heading.ambiguousChars: Solve()
